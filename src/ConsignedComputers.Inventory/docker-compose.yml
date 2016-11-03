@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  consignedcomputers.inventory:
+    image: user/consignedcomputers.inventory${TAG}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80"
+  db_inv:
+    image: postgres
+
