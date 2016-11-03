@@ -1,13 +1,25 @@
 version: '2'
 
 services:
-  consignedcomputers.inventory:
-    image: user/consignedcomputers.inventory${TAG}
-    build:
-      context: .
-      dockerfile: Dockerfile
+  inv_lb:
+    image: dockercloud/haproxy
+    links:
+      - inv
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "80:80"
+      - "1936:1936"
+    depends_on:
+      - inv
+  inv:
+    image: user/consignedcomputers.inventory
     ports:
       - "80"
+    environment:
+      "ConnectionStrings:Default": server=db_inv; User ID=postgres;
+    depends_on:
+      - db_inv
   db_inv:
     image: postgres
 

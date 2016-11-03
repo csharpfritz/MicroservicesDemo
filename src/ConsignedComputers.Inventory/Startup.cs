@@ -14,8 +14,6 @@ using Swashbuckle.Swagger.Model;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using System.Net.Http;
-using Microphone.AspNet;
-using Microphone.Consul;
 
 namespace ConsignedComputers.Inventory
 {
@@ -23,9 +21,6 @@ namespace ConsignedComputers.Inventory
   {
 
     public static readonly int ApiVersion = 1;
-
-    private static readonly Lazy<string> Host = new Lazy<string>(() => RancherMetadata.GetHost());
-    private static readonly Lazy<string> Port = new Lazy<string>(() => RancherMetadata.GetPort());
 
     public Startup(IHostingEnvironment env)
     {
@@ -52,12 +47,6 @@ namespace ConsignedComputers.Inventory
       services.AddSwaggerGen();
       services.ConfigureSwaggerGen(ConfigureSwaggerGen);
 
-      services.AddMicrophone<ConsulProvider>();
-      services.Configure<ConsulOptions>(o =>
-      {
-        o.Host = Startup.Host.Value;
-      });
-
       // Add framework services.
       services.AddMvc();
       services.AddApiVersioning(o => o.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(ApiVersion, 0));
@@ -71,15 +60,10 @@ namespace ConsignedComputers.Inventory
       loggerFactory.AddConsole(Configuration.GetSection("Logging"));
       loggerFactory.AddDebug();
 
-      var port = Startup.Port.Value;
-      var host = Startup.Host.Value;
-      Console.WriteLine($"Running on rancher host IP {host}");
-
       context.Database.Migrate();
       context.EnsureSeedData();
 
-      app.UseMvcWithDefaultRoute()
-        .UseMicrophone("InventoryService", "1.0", new Uri($"http://{host}:{port}"));
+      app.UseMvcWithDefaultRoute();
 
       app.UseSwagger()
         .UseSwaggerUi();
@@ -110,48 +94,4 @@ namespace ConsignedComputers.Inventory
 
   }
 
-  public static class RancherMetadata
-
-  {
-
-
-
-
-
-    public static string GetHost()
-
-    {
-
-      var host = HttpGet("http://rancher-metadata/2015-12-19/self/host/agent_ip");
-      return host;
-
-    }
-
-
-
-    public static string GetPort()
-    {
-
-      var port = HttpGet("http://rancher-metadata/2015-12-19/self/service/ports/0").Split(':')[0];
-      return port;
-
-    }
-
-
-
-    private static string HttpGet(string uri)
-
-    {
-
-      var http = new HttpClient();
-
-      http.BaseAddress = new Uri(uri);
-
-      var res = http.GetStringAsync("").Result;
-
-      return res;
-
-    }
-
-  }
 }

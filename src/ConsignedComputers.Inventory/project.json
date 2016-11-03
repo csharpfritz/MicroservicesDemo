@@ -19,7 +19,6 @@
     "Swashbuckle.SwaggerGen": "6.0.0-beta902",
     "Swashbuckle.SwaggerUi": "6.0.0-beta902",
     "Microsoft.AspNetCore.Mvc.Versioning": "1.0.0",
-    "Microphone.AspNet": "0.6.7", 
     "ConsignedComputers.Core": "1.0.0-*"
   },
   "tools": {
